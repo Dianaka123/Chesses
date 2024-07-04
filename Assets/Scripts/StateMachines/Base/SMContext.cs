@@ -39,13 +39,13 @@ namespace Assets.Scripts.StateMachines.Base
             }
         }
 
-        private async UniTask StateTransition(State newState, CancellationToken token = default)
+        private UniTask StateTransition(State newState, CancellationToken token = default)
         {
             lock (this)
             {
                 if (CurrentState == newState)
                 {
-                    return;
+                    return UniTask.CompletedTask;
                 }
 
                 if (CurrentState != null)
@@ -56,6 +56,8 @@ namespace Assets.Scripts.StateMachines.Base
                 CurrentState = newState;
                 CurrentState.Enter(token);
             }
+
+            return UniTask.CompletedTask;
         }
     }
 }

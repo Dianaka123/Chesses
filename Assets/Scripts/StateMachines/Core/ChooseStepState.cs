@@ -51,7 +51,7 @@ namespace Assets.Scripts.StateMachines.Core
             return base.Enter(token);
         }
 
-        public async override UniTask Run(CancellationToken token)
+        public override UniTask Run(CancellationToken token)
         {
             if (Input.GetMouseButtonDown(1))
             {
@@ -76,6 +76,8 @@ namespace Assets.Scripts.StateMachines.Core
                     }
                 }
             }
+
+            return UniTask.CompletedTask;
         }
 
         public override UniTask Exit(CancellationToken token)

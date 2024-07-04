@@ -34,7 +34,7 @@ namespace Assets.Scripts.StateMachines.Core
             return base.Enter(token);
         }
 
-        public async override UniTask Run(CancellationToken token)
+        public override UniTask Run(CancellationToken token)
         {
             Vector2Int newPosition = _boardManager.GetIndxesByCellPosition(_step);
             _enemy = _boardManager.GetChessByPosition(newPosition);
@@ -55,6 +55,8 @@ namespace Assets.Scripts.StateMachines.Core
 
                 GoTo(_chooseChessState.Value, token);
             }
+
+            return UniTask.CompletedTask;
         }
 
         public async override UniTask Exit(CancellationToken token)
