@@ -13,6 +13,12 @@ namespace Assets.Scripts.Game.Managers
         private IPossibleStepsSystem _possibleStepsSystem;
         private Board _board;
 
+        public BoardManager(IBoardCoordinateSystem boardCoordinateSystem, IPossibleStepsSystem possibleStepsSystem)
+        {
+            _boardCoordinateSystem = boardCoordinateSystem;
+            _possibleStepsSystem = possibleStepsSystem;
+        }
+
         public void Init(Board board)
         {
             _board = board;
@@ -56,12 +62,12 @@ namespace Assets.Scripts.Game.Managers
             return _boardCoordinateSystem.GetIndexesByPosition(position);
         }
 
-        public Vector3 GetCellSize()
+        public Vector2 GetCellSize()
         {
             return _boardCoordinateSystem.GetCellSize();
         }
 
-        public bool IsShah(PlayersColor playerColor)                            
+        public bool IsShah(PlayersColor playerColor)
         {
             foreach (var figureByPosition in _figureToPositionDictionary)
             {

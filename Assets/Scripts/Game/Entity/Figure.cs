@@ -38,9 +38,9 @@ namespace Assets.Scripts.Game.Entity
             _defaultY = gameObject.transform.localPosition.y;
         }
 
-        public async UniTask MoveTo(Vector3 position)
+        public UniTask MoveTo(Vector3 position)
         {
-            await transform.DOLocalMove(position, 1);
+            return transform.DOLocalMove(position, 1).ToUniTask();
         }
 
         public void ChangeColorBySelect(bool isSelected)

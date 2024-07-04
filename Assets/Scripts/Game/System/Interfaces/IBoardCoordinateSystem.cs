@@ -7,6 +7,6 @@ namespace Assets.Scripts.Game.System.Interfaces
         void Init(Vector3 boardSize);
         Vector3 GetCellPositionByIndexes(Vector2Int position);
         Vector2Int GetIndexesByPosition(Vector3 position);
-        Vector3 GetCellSize();
+        Vector2 GetCellSize();
     }
 }

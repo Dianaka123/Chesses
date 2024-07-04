@@ -1,41 +1,37 @@
 using Assets.Scripts.Game;
 using Assets.Scripts.Game.Entity;
 using Assets.Scripts.Game.Managers;
-using Assets.Scripts.ScriptableObjects;
+using Assets.Scripts.Game.System;
+using Assets.Scripts.StateMachines.Base;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using UnityEngine;
+using Zenject;
 
-namespace Assets.Scripts.StateMachines
+namespace Assets.Scripts.StateMachines.Core
 {
     public class SetupChessState : State
     {
-        private readonly ChessSM _chessSM;
         private readonly BoardManager _boardManager;
+        private readonly GameConfigurationFacade _chessConfigurationFacade;
+        private readonly LazyInject<ChooseChessState> _chooseChessState;
 
-        private ChessConfiguration _chessConfiguration;
-        private Board _board;
-
-        public SetupChessState(ChessSM sm)
+        public SetupChessState(ChessSM chessSM, BoardManager boardManager, GameConfigurationFacade chessConfigurationFacade, LazyInject<ChooseChessState> chooseChessState) : base(chessSM)
         {
-            _chessSM = sm;
-        }
-
-        public override UniTask Enter(CancellationToken token)
-        {
-            _chessConfiguration = Resources.Load<ChessConfiguration>("ChessConfiguration");
-            return base.Enter(token);
+            _boardManager = boardManager;
+            _chessConfigurationFacade = chessConfigurationFacade;
+            _chooseChessState = chooseChessState;
         }
 
         public override UniTask Run(CancellationToken token)
         {
-            _board = MonoBehaviour.Instantiate<Board>(_chessConfiguration.Board);
-            _boardManager.Init(_board);
+            var board = MonoBehaviour.Instantiate<Board>(_chessConfigurationFacade.BoardConfiguration.Board);
+            _boardManager.Init(board);
 
-            CreateChessSet(_board.transform);
+            CreateChessSet(board.transform);
 
-            _chessSM.GoTo(new ChooseChessState(_chessSM), default);
+            GoTo(_chooseChessState.Value, token);
             return UniTask.CompletedTask;
         }
 
@@ -45,14 +41,14 @@ namespace Assets.Scripts.StateMachines
 
             Action<FigureType, Vector2Int, PlayersColor> SpawnFigure = (type, position, color) => 
             {
-                var figureReference = _chessConfiguration.FigureByType[type];
-                var material = _chessConfiguration.GetMaterialByColor(color);
+                var figureReference = _chessConfigurationFacade.FigureByType[type];
+                var material = _chessConfigurationFacade.GetMaterialByPlayerColor(color);
 
                 Figure figure = MonoBehaviour.Instantiate(figureReference, parent);
                 _boardManager.AddInitionalChessPosition(figure, position);
                 var positionV3 = _boardManager.GetCellPositionByIndexes(position);
 
-                figure.Init(material, _chessConfiguration.selectedColor, color, type);
+                figure.Init(material, _chessConfigurationFacade.HighlighterChessColor, color, type);
                 figure.SetInitialPosition(positionV3);
 
             };

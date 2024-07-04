@@ -3,12 +3,19 @@ using Assets.Scripts.Game.Managers;
 using Assets.Scripts.Game.System.Interfaces;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 namespace Assets.Scripts.Game.System
 {
+    //TODO: need to remove dependency on BoardManager
     public class PossibleStepsSystem : IPossibleStepsSystem
     {
-        private readonly BoardManager _boardManager;
+        private readonly LazyInject<BoardManager> _boardManager;
+
+        public PossibleStepsSystem(LazyInject<BoardManager> boardManager)
+        {
+            _boardManager = boardManager;
+        }
 
         private Dictionary<FigureType, Vector2Int[]> stepsByType = new Dictionary<FigureType, Vector2Int[]>()
         {
@@ -79,7 +86,7 @@ namespace Assets.Scripts.Game.System
                     possibleStep += step;
                     if (possibleStep.IsCoordinateValid())
                     {
-                        var chess = _boardManager.GetChessByPosition(possibleStep);
+                        var chess = _boardManager.Value.GetChessByPosition(possibleStep);
                         if (chess != null && chess.Color == color)
                         {
                             break;
@@ -111,7 +118,7 @@ namespace Assets.Scripts.Game.System
                 var possiblePosition = currentPosition + step;
                 if (possiblePosition.IsCoordinateValid())
                 {
-                    var chess = _boardManager.GetChessByPosition(possiblePosition);
+                    var chess = _boardManager.Value.GetChessByPosition(possiblePosition);
                     if (chess != null && chess.Color == color)
                     {
                         continue;
@@ -133,7 +140,7 @@ namespace Assets.Scripts.Game.System
             foreach (var step in stepDirection)
             {
                 var availablePosition = CalculateStraightAheadStep(color, currentPosition, step);
-                var chess = _boardManager.GetChessByPosition(availablePosition);
+                var chess = _boardManager.Value.GetChessByPosition(availablePosition);
 
                 if (chess != null)
                 {
@@ -155,7 +162,7 @@ namespace Assets.Scripts.Game.System
                     continue;
                 }
 
-                var potencialEnemy = _boardManager.GetChessByPosition(availablePosition);
+                var potencialEnemy = _boardManager.Value.GetChessByPosition(availablePosition);
 
                 if (potencialEnemy != null && potencialEnemy.Type == FigureType.Pawn && potencialEnemy.Color != color)
                 {

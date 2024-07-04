@@ -1,11 +1,12 @@
 using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-namespace Assets.Scripts.StateMachines
+namespace Assets.Scripts.StateMachines.Base
 {
-    public class SMContext : MonoBehaviour
+    public class SMContext
     {
         public State CurrentState { get; private set; }
 
@@ -13,7 +14,14 @@ namespace Assets.Scripts.StateMachines
 
         public void Run(CancellationToken token)
         {
-            CurrentState.Run(token);
+            try
+            {
+                CurrentState.Run(token);
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         public async void GoTo(State state, CancellationToken token)

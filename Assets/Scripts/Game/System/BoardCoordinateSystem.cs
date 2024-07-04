@@ -43,12 +43,12 @@ namespace Assets.Scripts.Game.System
             return new Vector2Int(x, y);
         }
 
-        public Vector3 GetCellSize()
+        public Vector2 GetCellSize()
         {
             var cellSizeX = _boardSize.x / CellExtension.MAX_CELL_COUNT;
             var cellSizeZ = _boardSize.z / CellExtension.MAX_CELL_COUNT;
 
-            return new Vector3(cellSizeX, 0, cellSizeZ);
+            return new Vector2(cellSizeX, cellSizeZ);
         }
     }
 }

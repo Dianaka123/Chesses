@@ -1,35 +1,36 @@
 using Assets.Scripts.Game.Entity;
 using Assets.Scripts.Game.Managers;
+using Assets.Scripts.StateMachines.Base;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
+using Zenject;
 
-namespace Assets.Scripts.StateMachines
+namespace Assets.Scripts.StateMachines.Core
 {
     public class ChooseChessState : State
     {
-        private readonly ChessSM _chessSM;
-        private readonly Camera _camera;
         private readonly GameManager _gameManager;
-        private readonly CameraManager _cameraManager;
+        private readonly LazyInject<ChooseStepState> _chooseStepState;
 
         private Figure _highlightFigure;
-        private Figure _selectedFigure;
         private PlayersColor _playerStep;
+        private Camera _camera;
 
-        public ChooseChessState(ChessSM sm)
+        public ChooseChessState(ChessSM chessSM, GameManager gameManager, CameraManager cameraManager, LazyInject<ChooseStepState> chooseStepState) : base(chessSM)
         {
-            _chessSM = sm;
-            _camera = _cameraManager.CurrentCamera;
+            _gameManager = gameManager;
+            _camera = cameraManager.CurrentCamera;
+            _chooseStepState = chooseStepState;
         }
 
         public override UniTask Enter(CancellationToken token)
         {
             _playerStep = _gameManager.PlayerStep;
 
-            if (_selectedFigure != null)
+            if (_gameManager.SelectedFigure != null)
             {
-                _selectedFigure.Deselect().Forget();
+                _gameManager.SelectedFigure.Deselect().Forget();
             }
 
             return base.Enter(token);
@@ -65,9 +66,10 @@ namespace Assets.Scripts.StateMachines
                 var figure = raycastHit.collider.gameObject?.GetComponent<Figure>();
                 if (figure != null && figure.Color == _playerStep)
                 {
-                    _selectedFigure = figure;
-                    _selectedFigure.Select().Forget();
-                    _chessSM.GoTo(new ChooseStepState(_chessSM, figure, _camera), token);
+                    _gameManager.SelectedFigure = figure;
+                    _gameManager.SelectedFigure.Select().Forget();
+
+                    GoTo(_chooseStepState.Value, token);
                 }
             }
         }
