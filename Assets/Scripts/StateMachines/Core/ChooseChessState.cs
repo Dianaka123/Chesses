@@ -36,7 +36,7 @@ namespace Assets.Scripts.StateMachines.Core
             return base.Enter(token);
         }
 
-        public override UniTask Run(CancellationToken token)
+        public async override UniTask Run(CancellationToken token)
         {
             Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit raycastHit;
@@ -69,11 +69,9 @@ namespace Assets.Scripts.StateMachines.Core
                     _gameManager.SelectedFigure = figure;
                     _gameManager.SelectedFigure.Select().Forget();
 
-                    GoTo(_chooseStepState.Value, token);
+                    await GoTo(_chooseStepState.Value, token);
                 }
             }
-
-            return UniTask.CompletedTask;
         }
     }
 }

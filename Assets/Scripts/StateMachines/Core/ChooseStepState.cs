@@ -51,7 +51,7 @@ namespace Assets.Scripts.StateMachines.Core
             return base.Enter(token);
         }
 
-        public override UniTask Run(CancellationToken token)
+        public async override UniTask Run(CancellationToken token)
         {
             if (Input.GetMouseButtonDown(1))
             {
@@ -68,7 +68,7 @@ namespace Assets.Scripts.StateMachines.Core
                     if(availableStep != null)
                     {
                         _gameManager.SelectedFigureStep = availableStep.transform.position;
-                        GoTo(_doStepState.Value, token);
+                        await GoTo(_doStepState.Value, token);
                     }
                     else
                     {
@@ -76,8 +76,6 @@ namespace Assets.Scripts.StateMachines.Core
                     }
                 }
             }
-
-            return UniTask.CompletedTask;
         }
 
         public override UniTask Exit(CancellationToken token)

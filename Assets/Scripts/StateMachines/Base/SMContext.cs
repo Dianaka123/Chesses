@@ -6,17 +6,30 @@ using UnityEngine;
 
 namespace Assets.Scripts.StateMachines.Base
 {
+    internal enum Stage
+    {
+        Enter,
+        Run,
+        Exit
+    }
+
     public class SMContext
     {
         public State CurrentState { get; private set; }
 
         private Stack<State> _states = new Stack<State>();
+        private Stage _stage;
 
-        public void Run(CancellationToken token)
+        public async void Run(CancellationToken token)
         {
+            if(_stage == Stage.Enter || _stage == Stage.Exit)
+            {
+                return;
+            }
+
             try
             {
-                CurrentState.Run(token);
+                await CurrentState.Run(token);
             }
             catch(Exception e)
             {
@@ -24,7 +37,7 @@ namespace Assets.Scripts.StateMachines.Base
             }
         }
 
-        public async void GoTo(State state, CancellationToken token)
+        public async UniTask GoTo(State state, CancellationToken token)
         {
             _states.Push(state);
             await StateTransition(state, token);
@@ -39,25 +52,27 @@ namespace Assets.Scripts.StateMachines.Base
             }
         }
 
-        private UniTask StateTransition(State newState, CancellationToken token = default)
+        private async UniTask StateTransition(State newState, CancellationToken token = default)
         {
-            lock (this)
+            if (CurrentState == newState)
             {
-                if (CurrentState == newState)
-                {
-                    return UniTask.CompletedTask;
-                }
-
-                if (CurrentState != null)
-                {
-                    CurrentState.Exit(token);
-                }
-
-                CurrentState = newState;
-                CurrentState.Enter(token);
+                return;
             }
 
-            return UniTask.CompletedTask;
+            if (CurrentState != null)
+            {
+                Debug.Log("Exit " + CurrentState.GetType().Name);
+                _stage = Stage.Exit;
+                await CurrentState.Exit(token);
+            }
+
+            CurrentState = newState;
+            Debug.Log("Inter " + CurrentState.GetType().Name);
+
+            _stage = Stage.Enter;
+            await CurrentState.Enter(token);
+
+            _stage = Stage.Run;
         }
     }
 }

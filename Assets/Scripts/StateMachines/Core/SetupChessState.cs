@@ -16,29 +16,40 @@ namespace Assets.Scripts.StateMachines.Core
         private readonly BoardManager _boardManager;
         private readonly GameConfigurationFacade _chessConfigurationFacade;
         private readonly LazyInject<ChooseChessState> _chooseChessState;
+        private readonly CameraManager _cameraManager;
 
-        public SetupChessState(ChessSM chessSM, BoardManager boardManager, GameConfigurationFacade chessConfigurationFacade, LazyInject<ChooseChessState> chooseChessState) : base(chessSM)
+        public SetupChessState(ChessSM chessSM, BoardManager boardManager, GameConfigurationFacade chessConfigurationFacade, LazyInject<ChooseChessState> chooseChessState,
+            CameraManager cameraManager) : base(chessSM)
         {
             _boardManager = boardManager;
             _chessConfigurationFacade = chessConfigurationFacade;
             _chooseChessState = chooseChessState;
+            _cameraManager = cameraManager;
         }
 
-        public override UniTask Run(CancellationToken token)
+        public override UniTask Enter(CancellationToken token)
+        {
+            _cameraManager.Button.onClick.AddListener(OnClick);
+            return base.Enter(token);
+        }
+
+        private void OnClick()
+        {
+            _boardManager.ResetAllFigures();
+        }
+
+        public async override UniTask Run(CancellationToken token)
         {
             var board = MonoBehaviour.Instantiate<Board>(_chessConfigurationFacade.BoardConfiguration.Board);
             _boardManager.Init(board);
 
             CreateChessSet(board.transform);
 
-            GoTo(_chooseChessState.Value, token);
-            return UniTask.CompletedTask;
+            await GoTo(_chooseChessState.Value, token);
         }
 
         private void CreateChessSet(Transform parent)
         {
-            var initFigureSequence = new FigureType[] { FigureType.Rook, FigureType.Knight, FigureType.Bishop, FigureType.King, FigureType.Queen, FigureType.Bishop, FigureType.Knight, FigureType.Rook };
-
             Action<FigureType, Vector2Int, PlayersColor> SpawnFigure = (type, position, color) => 
             {
                 var figureReference = _chessConfigurationFacade.FigureByType[type];
@@ -53,17 +64,16 @@ namespace Assets.Scripts.StateMachines.Core
 
             };
 
-            var firstRowFigure = FigureType.Pawn;
 
             for (int i = 0; i < 8; i++)
             {
-                var secondRowFigureType = initFigureSequence[i];
+                var firstRowFigureType = _chessConfigurationFacade.FirstRowInitSequence[i];
 
-                SpawnFigure(firstRowFigure, new Vector2Int(i, 1), PlayersColor.White);
-                SpawnFigure(secondRowFigureType, new Vector2Int(i, 0), PlayersColor.White);
+                SpawnFigure(_chessConfigurationFacade.SecondRowFigure, new Vector2Int(i, 1), PlayersColor.White);
+                SpawnFigure(firstRowFigureType, new Vector2Int(i, 0), PlayersColor.White);
 
-                SpawnFigure(firstRowFigure, new Vector2Int(i, 6), PlayersColor.Black);
-                SpawnFigure(secondRowFigureType, new Vector2Int(i, 7), PlayersColor.Black);
+                SpawnFigure(_chessConfigurationFacade.SecondRowFigure, new Vector2Int(i, 6), PlayersColor.Black);
+                SpawnFigure(firstRowFigureType, new Vector2Int(i, 7), PlayersColor.Black);
             }
         }
     }

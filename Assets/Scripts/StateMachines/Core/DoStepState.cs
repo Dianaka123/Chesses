@@ -14,16 +14,18 @@ namespace Assets.Scripts.StateMachines.Core
         private readonly BoardManager _boardManager;
         private readonly GameManager _gameManager;
         private readonly LazyInject<ChooseChessState> _chooseChessState;
+        private readonly LazyInject<WinState> _winState;
 
         private Figure _figure;
         private Vector3 _step;
         private Figure _enemy;
 
-        public DoStepState(ChessSM chessSM, BoardManager boardManager, GameManager gameManager, LazyInject<ChooseChessState> chooseChessState) : base(chessSM)
+        public DoStepState(ChessSM chessSM, BoardManager boardManager, GameManager gameManager, LazyInject<ChooseChessState> chooseChessState, LazyInject<WinState> winState) : base(chessSM)
         {
             _boardManager = boardManager;
             _gameManager = gameManager;
             _chooseChessState = chooseChessState;
+            _winState = winState;
         }
 
         public override UniTask Enter(CancellationToken token)
@@ -34,7 +36,7 @@ namespace Assets.Scripts.StateMachines.Core
             return base.Enter(token);
         }
 
-        public override UniTask Run(CancellationToken token)
+        public override async UniTask Run(CancellationToken token)
         {
             Vector2Int newPosition = _boardManager.GetIndxesByCellPosition(_step);
             _enemy = _boardManager.GetChessByPosition(newPosition);
@@ -42,7 +44,7 @@ namespace Assets.Scripts.StateMachines.Core
 
             if (_enemy != null && _enemy.Type == FigureType.King)
             {
-                //GoTo(new WinState(ChessSM), token);
+                await GoTo(_winState.Value, token);
             }
             else
             {
@@ -51,12 +53,9 @@ namespace Assets.Scripts.StateMachines.Core
                 //_boardManager.IsShah(_figure.Color);
 
                 _gameManager.StepComplited();
-                Debug.Log(_gameManager.PlayerStep);
 
-                GoTo(_chooseChessState.Value, token);
+                await GoTo(_chooseChessState.Value, token);
             }
-
-            return UniTask.CompletedTask;
         }
 
         public async override UniTask Exit(CancellationToken token)
@@ -67,7 +66,6 @@ namespace Assets.Scripts.StateMachines.Core
             {
                 await _enemy.FallAnimation();
             }
-
             await base.Exit(token);
         }
     }

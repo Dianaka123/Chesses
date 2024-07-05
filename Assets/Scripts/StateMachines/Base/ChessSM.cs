@@ -15,9 +15,9 @@ namespace Assets.Scripts.StateMachines.Base
             _setup = setup;
         }
 
-        public void Initialize()
+        public async void Initialize()
         {
-            GoTo(_setup.Value, cancellationTokenSource.Token);
+            await GoTo(_setup.Value, cancellationTokenSource.Token);
         }
 
         public void Dispose()

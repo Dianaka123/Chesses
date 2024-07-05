@@ -1,8 +1,8 @@
-﻿using Assets.Scripts.Game.Managers;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using System;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Game.Entity
 {
@@ -33,14 +33,15 @@ namespace Assets.Scripts.Game.Entity
 
         public void SetInitialPosition(Vector3 position)
         {
-            gameObject.transform.localPosition = position;
+            transform.localPosition = position;
 
-            _defaultY = gameObject.transform.localPosition.y;
+            _defaultY = transform.localPosition.y;
         }
 
         public UniTask MoveTo(Vector3 position)
         {
-            return transform.DOLocalMove(position, 1).ToUniTask();
+             transform.DOLocalMove(position, 1);
+             return UniTask.Delay(1000);
         }
 
         public void ChangeColorBySelect(bool isSelected)
@@ -69,6 +70,16 @@ namespace Assets.Scripts.Game.Entity
         {
             await transform.DORotate(new Vector3(90, 0, 0), 1f);
             await _renderer.DissolveAsync(1f);
+        }
+
+        public void ResetFigure(Vector3 resetPosition)
+        {
+            _renderer.ResetShaderToStandart();
+            if(transform.rotation.x != 0)
+            {
+                transform.rotation = Quaternion.identity;
+            }
+            transform.localPosition = resetPosition;
         }
     }
 }

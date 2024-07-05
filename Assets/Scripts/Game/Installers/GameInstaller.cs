@@ -4,6 +4,7 @@ using Assets.Scripts.Game.System;
 using Assets.Scripts.StateMachines.Base;
 using Assets.Scripts.StateMachines.Core;
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
 
 namespace Assets.Scripts.Game.Installers
@@ -13,6 +14,8 @@ namespace Assets.Scripts.Game.Installers
         [SerializeField]
         private GameObject _highliterStep;
 
+        
+        
         public override void InstallBindings()
         {
             Container.BindMemoryPool<HighliterStep, HighliterStep.Pool>()
@@ -39,6 +42,7 @@ namespace Assets.Scripts.Game.Installers
             Container.Bind<ChooseChessState>().AsSingle();
             Container.Bind<ChooseStepState>().AsSingle();
             Container.Bind<DoStepState>().AsSingle();
+            Container.Bind<WinState>().AsSingle();
         }
 
         void InstallerManagers()

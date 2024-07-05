@@ -1,6 +1,8 @@
 using Assets.Scripts.Game.Entity;
 using Assets.Scripts.Game.System.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.Scripts.Game.Managers
@@ -9,6 +11,8 @@ namespace Assets.Scripts.Game.Managers
     {
         private Figure[,] _figureArray = new Figure[8, 8];
         private Dictionary<Figure, Vector2Int> _figureToPositionDictionary = new Dictionary<Figure, Vector2Int>(16);
+        private Dictionary<Figure, Vector2Int> _initionalFigureToPositionDictionary = new Dictionary<Figure, Vector2Int>(16);
+
         private IBoardCoordinateSystem _boardCoordinateSystem;
         private IPossibleStepsSystem _possibleStepsSystem;
         private Board _board;
@@ -29,6 +33,7 @@ namespace Assets.Scripts.Game.Managers
         {
             _figureArray[vector.x, vector.y] = figure;
             _figureToPositionDictionary.Add(figure, vector);
+            _initionalFigureToPositionDictionary.Add(figure, vector);
         }
 
         public Vector2Int GetPositionByChess(Figure figure) => _figureToPositionDictionary[figure];
@@ -65,6 +70,19 @@ namespace Assets.Scripts.Game.Managers
         public Vector2 GetCellSize()
         {
             return _boardCoordinateSystem.GetCellSize();
+        }
+
+        public void ResetAllFigures()
+        {
+            foreach (var figureAndPos in _initionalFigureToPositionDictionary)
+            {
+                var initionalPos = _boardCoordinateSystem.GetCellPositionByIndexes(figureAndPos.Value);
+                var figure = figureAndPos.Key;
+
+                figure.ResetFigure(initionalPos);
+            }
+
+            _figureToPositionDictionary = new Dictionary<Figure, Vector2Int>(_initionalFigureToPositionDictionary); ;
         }
 
         public bool IsShah(PlayersColor playerColor)

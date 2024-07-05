@@ -11,13 +11,21 @@ namespace Assets.Scripts.StateMachines.Base
             ChessSM = chessSM;
         }
 
-        public virtual UniTask Enter(CancellationToken token) { return UniTask.CompletedTask; }
-        public virtual UniTask Exit(CancellationToken token) { return UniTask.CompletedTask; }
+        public virtual UniTask Enter(CancellationToken token)
+        {
+            return UniTask.CompletedTask;
+        }
+        
+        public virtual UniTask Exit(CancellationToken token)
+        {
+            return UniTask.CompletedTask;
+        }
+
         public abstract UniTask Run(CancellationToken token);
 
-        public void GoTo(State state, CancellationToken token)
+        public UniTask GoTo(State state, CancellationToken token)
         {
-            ChessSM.GoTo(state, token);
+            return ChessSM.GoTo(state, token);
         }
 
         public void Back(CancellationToken token)
