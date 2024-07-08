@@ -1,6 +1,7 @@
 using Assets.Scripts.Game;
 using Assets.Scripts.Game.Entity;
 using Assets.Scripts.Game.Managers;
+using Assets.Scripts.Game.Signal;
 using Assets.Scripts.StateMachines.Base;
 using Cysharp.Threading.Tasks;
 using System.Threading;
@@ -15,17 +16,20 @@ namespace Assets.Scripts.StateMachines.Core
         private readonly GameManager _gameManager;
         private readonly LazyInject<ChooseChessState> _chooseChessState;
         private readonly LazyInject<WinState> _winState;
+        private readonly SignalBus _signalBus;
 
         private Figure _figure;
         private Vector3 _step;
         private Figure _enemy;
 
-        public DoStepState(ChessSM chessSM, BoardManager boardManager, GameManager gameManager, LazyInject<ChooseChessState> chooseChessState, LazyInject<WinState> winState) : base(chessSM)
+        public DoStepState(ChessSM chessSM, BoardManager boardManager, GameManager gameManager,
+            LazyInject<ChooseChessState> chooseChessState, LazyInject<WinState> winState, SignalBus signalBus) : base(chessSM)
         {
             _boardManager = boardManager;
             _gameManager = gameManager;
             _chooseChessState = chooseChessState;
             _winState = winState;
+            _signalBus = signalBus;
         }
 
         public override UniTask Enter(CancellationToken token)
@@ -38,9 +42,11 @@ namespace Assets.Scripts.StateMachines.Core
 
         public override async UniTask Run(CancellationToken token)
         {
-            Vector2Int newPosition = _boardManager.GetIndxesByCellPosition(_step);
+            Vector2Int newPosition = _boardManager.GetIndexesByPosition(_step);
             _enemy = _boardManager.GetChessByPosition(newPosition);
             _boardManager.ChangeChessPosition(_figure, newPosition);
+
+            _signalBus.Fire(new StepSignal(newPosition, _figure.Color, _figure.Type));
 
             if (_enemy != null && _enemy.Type == FigureType.King)
             {

@@ -22,7 +22,7 @@ namespace Assets.Scripts.StateMachines.Base
 
         public async void Run(CancellationToken token)
         {
-            if(_stage == Stage.Enter || _stage == Stage.Exit)
+            if(_stage != Stage.Run)
             {
                 return;
             }
@@ -61,13 +61,11 @@ namespace Assets.Scripts.StateMachines.Base
 
             if (CurrentState != null)
             {
-                Debug.Log("Exit " + CurrentState.GetType().Name);
                 _stage = Stage.Exit;
                 await CurrentState.Exit(token);
             }
 
             CurrentState = newState;
-            Debug.Log("Inter " + CurrentState.GetType().Name);
 
             _stage = Stage.Enter;
             await CurrentState.Enter(token);

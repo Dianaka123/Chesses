@@ -20,7 +20,9 @@ namespace Assets.Scripts.StateMachines.Core
 
         public async override UniTask Run(CancellationToken token)
         {
-            _boardManager.ResetAllFigures();
+
+            //TODO: Popup which ask Restart or Exit
+            _boardManager.ResetAllFiguresPositions();
 
             await GoTo(_chooseChessState.Value, token);
         }

@@ -16,33 +16,22 @@ namespace Assets.Scripts.StateMachines.Core
         private readonly BoardManager _boardManager;
         private readonly GameConfigurationFacade _chessConfigurationFacade;
         private readonly LazyInject<ChooseChessState> _chooseChessState;
-        private readonly CameraManager _cameraManager;
 
-        public SetupChessState(ChessSM chessSM, BoardManager boardManager, GameConfigurationFacade chessConfigurationFacade, LazyInject<ChooseChessState> chooseChessState,
-            CameraManager cameraManager) : base(chessSM)
+        public SetupChessState(ChessSM chessSM, BoardManager boardManager, GameConfigurationFacade chessConfigurationFacade, LazyInject<ChooseChessState> chooseChessState) : base(chessSM)
         {
             _boardManager = boardManager;
             _chessConfigurationFacade = chessConfigurationFacade;
             _chooseChessState = chooseChessState;
-            _cameraManager = cameraManager;
         }
 
         public override UniTask Enter(CancellationToken token)
         {
-            _cameraManager.Button.onClick.AddListener(OnClick);
             return base.Enter(token);
-        }
-
-        private void OnClick()
-        {
-            _boardManager.ResetAllFigures();
         }
 
         public async override UniTask Run(CancellationToken token)
         {
             var board = MonoBehaviour.Instantiate<Board>(_chessConfigurationFacade.BoardConfiguration.Board);
-            _boardManager.Init(board);
-
             CreateChessSet(board.transform);
 
             await GoTo(_chooseChessState.Value, token);
@@ -56,7 +45,7 @@ namespace Assets.Scripts.StateMachines.Core
                 var material = _chessConfigurationFacade.GetMaterialByPlayerColor(color);
 
                 Figure figure = MonoBehaviour.Instantiate(figureReference, parent);
-                _boardManager.AddInitionalChessPosition(figure, position);
+                _boardManager.InitChessPosition(figure, position);
                 var positionV3 = _boardManager.GetCellPositionByIndexes(position);
 
                 figure.Init(material, _chessConfigurationFacade.HighlighterChessColor, color, type);

@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Game.System.Interfaces;
+﻿using Assets.Scripts.Game.Extensions;
+using Assets.Scripts.Game.System.Interfaces;
 using System;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace Assets.Scripts.Game.System
     {
         private Vector3 _boardSize;
 
-        public void Init(Vector3 boardSize)
+        public void SetupBoardSize(Vector3 boardSize)
         {
             _boardSize = boardSize;
         }

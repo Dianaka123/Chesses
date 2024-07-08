@@ -7,8 +7,6 @@ namespace Assets.Scripts.Game.Managers
     {
         public Camera CurrentCamera => _gameCamera;
 
-        public Button Button;
-
         [SerializeField]
         private Camera _gameCamera;
     }

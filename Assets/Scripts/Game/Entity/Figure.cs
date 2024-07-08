@@ -1,4 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using Assets.Scripts.Game.Extensions;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using System;
 using UnityEngine;
@@ -8,8 +9,6 @@ namespace Assets.Scripts.Game.Entity
 {
     public class Figure : MonoBehaviour
     {
-        public Action<Figure, Vector2Int> ChangePosition;
-
         public PlayersColor Color { get; private set; }
         public FigureType Type { get; private set; }
 

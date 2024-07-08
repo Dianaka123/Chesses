@@ -1,98 +1,61 @@
 using Assets.Scripts.Game.Entity;
 using Assets.Scripts.Game.System.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
+using Zenject;
 
 namespace Assets.Scripts.Game.Managers
 {
-    public class BoardManager
+    public class BoardManager : IInitializable
     {
-        private Figure[,] _figureArray = new Figure[8, 8];
-        private Dictionary<Figure, Vector2Int> _figureToPositionDictionary = new Dictionary<Figure, Vector2Int>(16);
-        private Dictionary<Figure, Vector2Int> _initionalFigureToPositionDictionary = new Dictionary<Figure, Vector2Int>(16);
+        private readonly IChessPositioner _positioner;
+        private readonly IBoardCoordinateSystem _boardCoordinateSystem;
+        private readonly IPossibleStepsSystem _possibleStepsSystem;
 
-        private IBoardCoordinateSystem _boardCoordinateSystem;
-        private IPossibleStepsSystem _possibleStepsSystem;
-        private Board _board;
-
-        public BoardManager(IBoardCoordinateSystem boardCoordinateSystem, IPossibleStepsSystem possibleStepsSystem)
+        public BoardManager(IBoardCoordinateSystem boardCoordinateSystem, IPossibleStepsSystem possibleStepsSystem, IChessPositioner positioner)
         {
             _boardCoordinateSystem = boardCoordinateSystem;
             _possibleStepsSystem = possibleStepsSystem;
-        }
-
-        public void Init(Board board)
-        {
-            _board = board;
-            _boardCoordinateSystem.Init(_board.BoardSize);
-        }
-
-        public void AddInitionalChessPosition(Figure figure, Vector2Int vector)
-        {
-            _figureArray[vector.x, vector.y] = figure;
-            _figureToPositionDictionary.Add(figure, vector);
-            _initionalFigureToPositionDictionary.Add(figure, vector);
-        }
-
-        public Vector2Int GetPositionByChess(Figure figure) => _figureToPositionDictionary[figure];
-
-        public Figure GetChessByPosition(Vector2Int position) => _figureArray[position.x, position.y];
-
-        public void ChangeChessPosition(Figure figure, Vector2Int newPosition)
-        {
-            if (_figureToPositionDictionary.TryGetValue(figure, out var oldPosition))
-            {
-                _figureArray[oldPosition.x, oldPosition.y] = null;
-
-                var enemyFigure = _figureArray[newPosition.x, newPosition.y];
-                if (enemyFigure != null)
-                {
-                    _figureToPositionDictionary.Remove(enemyFigure);
-                }
-
-                _figureArray[newPosition.x, newPosition.y] = figure;
-                _figureToPositionDictionary[figure] = newPosition;
-            }
-        }
-
-        public Vector3 GetCellPositionByIndexes(Vector2Int index)
-        {
-            return _boardCoordinateSystem.GetCellPositionByIndexes(index);
+            _positioner = positioner;
         }
         
-        public Vector2Int GetIndxesByCellPosition(Vector3 position)
+        public void Initialize()
         {
-            return _boardCoordinateSystem.GetIndexesByPosition(position);
+            _positioner.ForceChangeChessPosition += ForceChangeChessPosition;
         }
 
-        public Vector2 GetCellSize()
+        public void SetupBoard(Board board)
         {
-            return _boardCoordinateSystem.GetCellSize();
+            _boardCoordinateSystem.SetupBoardSize(board.BoardSize);
         }
 
-        public void ResetAllFigures()
-        {
-            foreach (var figureAndPos in _initionalFigureToPositionDictionary)
-            {
-                var initionalPos = _boardCoordinateSystem.GetCellPositionByIndexes(figureAndPos.Value);
-                var figure = figureAndPos.Key;
+        public void InitChessPosition(Figure figure, Vector2Int position) => _positioner.InitiChessPosition(figure, position);
 
-                figure.ResetFigure(initionalPos);
-            }
+        public Figure GetChessByPosition(Vector2Int position) => _positioner.Figures[position.x, position.y];
 
-            _figureToPositionDictionary = new Dictionary<Figure, Vector2Int>(_initionalFigureToPositionDictionary); ;
-        }
+        public Figure GetChessByPosition(int x, int y) => _positioner.Figures[x, y];
 
+        public Vector2Int GetPositionByChess(Figure figure) => _positioner.FigureToPositionDictionary[figure];
+
+        public void ChangeChessPosition(Figure figure, Vector2Int newPosition) => _positioner.ChangeChessPosition(figure, newPosition);
+
+        public void ResetAllFiguresPositions() => _positioner.ResetAllFiguresPositions();
+
+
+        public Vector3 GetCellPositionByIndexes(Vector2Int position) => _boardCoordinateSystem.GetCellPositionByIndexes(position);
+
+        public Vector2Int GetIndexesByPosition(Vector3 position) => _boardCoordinateSystem.GetIndexesByPosition(position);
+
+        public Vector2 GetCellSize() => _boardCoordinateSystem.GetCellSize();
+
+        
         public bool IsShah(PlayersColor playerColor)
         {
-            foreach (var figureByPosition in _figureToPositionDictionary)
+            foreach (var figureByPosition in _positioner.FigureToPositionDictionary)
             {
                 var possibleSteps = _possibleStepsSystem.GetPossibleSteps(figureByPosition.Key, figureByPosition.Value);
                 foreach (var step in possibleSteps)
                 {
-                    var figure = _figureArray[step.x, step.y];
+                    var figure = _positioner.Figures[step.x, step.y];
                     if (figure != null && figure.Type == FigureType.King && figure.Color != playerColor)
                     {
                         return true;
@@ -101,6 +64,13 @@ namespace Assets.Scripts.Game.Managers
             }
 
             return false;
+        }
+
+
+        private void ForceChangeChessPosition(Figure figure, Vector2Int newPosition)
+        {
+            var positionV3 = _boardCoordinateSystem.GetCellPositionByIndexes(newPosition);
+            figure.ResetFigure(positionV3);
         }
     }
 }

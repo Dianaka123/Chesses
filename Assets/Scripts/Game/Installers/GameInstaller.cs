@@ -1,10 +1,10 @@
 using Assets.Scripts.Game.Entity;
 using Assets.Scripts.Game.Managers;
+using Assets.Scripts.Game.Signal;
 using Assets.Scripts.Game.System;
 using Assets.Scripts.StateMachines.Base;
 using Assets.Scripts.StateMachines.Core;
 using UnityEngine;
-using UnityEngine.UI;
 using Zenject;
 
 namespace Assets.Scripts.Game.Installers
@@ -13,11 +13,12 @@ namespace Assets.Scripts.Game.Installers
     {
         [SerializeField]
         private GameObject _highliterStep;
-
-        
         
         public override void InstallBindings()
         {
+            SignalBusInstaller.Install(Container);
+            Container.DeclareSignal<StepSignal>();
+
             Container.BindMemoryPool<HighliterStep, HighliterStep.Pool>()
                 .WithInitialSize(2)
                 .FromComponentInNewPrefab(_highliterStep)
@@ -47,8 +48,9 @@ namespace Assets.Scripts.Game.Installers
 
         void InstallerManagers()
         {
-            Container.Bind<BoardManager>().AsSingle();
+            Container.BindInterfacesAndSelfTo<BoardManager>().AsSingle();
             Container.Bind<GameManager>().AsSingle();
+            Container.BindInterfacesAndSelfTo<GameCanvasManager>().AsSingle();
         }
 
         void InstallFacade()
