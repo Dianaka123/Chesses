@@ -40,13 +40,11 @@ namespace Assets.Scripts.Game.Managers
 
         public void ResetAllFiguresPositions() => _positioner.ResetAllFiguresPositions();
 
-
         public Vector3 GetCellPositionByIndexes(Vector2Int position) => _boardCoordinateSystem.GetCellPositionByIndexes(position);
 
         public Vector2Int GetIndexesByPosition(Vector3 position) => _boardCoordinateSystem.GetIndexesByPosition(position);
 
         public Vector2 GetCellSize() => _boardCoordinateSystem.GetCellSize();
-
         
         public bool IsShah(PlayersColor playerColor)
         {

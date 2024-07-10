@@ -2,40 +2,46 @@ using Assets.Scripts.Game.Entity;
 using Assets.Scripts.Game.Extensions;
 using Assets.Scripts.Game.Signal;
 using System;
-using UnityEngine;
+using System.Collections.Generic;
 using Zenject;
 
 namespace Assets.Scripts.Game.Managers
 {
     public class GameCanvasManager : IInitializable, IDisposable
     {
-        private readonly GameCanvas _canvas;
         private readonly SignalBus _signalBus;
+        private readonly StepUIView.Pool _pool;
 
-        //TODO: Should release by Pool
-        private StepView _currentStep;
+        private StepUIView _currentStep;
+        private List<StepUIView> _steps = new List<StepUIView>();
 
-        public GameCanvasManager(GameCanvas gameCanvas, SignalBus signalBus)
+        public GameCanvasManager(SignalBus signalBus, StepUIView.Pool pool)
         {
-            _canvas = gameCanvas;
             _signalBus = signalBus;
+            _pool = pool;
         }
 
         public void Initialize()
         {
             _signalBus.Subscribe<StepSignal>(OnStep);
+            _signalBus.Subscribe<ResetSignal>(OnReset);
         }
 
         public void Dispose()
         {
             _signalBus.Unsubscribe<StepSignal>(OnStep);
+            _signalBus.Unsubscribe<ResetSignal>(OnReset);
         }
 
         private void OnStep(StepSignal stepSignal)
         {
             if(_currentStep == null)
             {
-                _currentStep = GameObject.Instantiate(_canvas.StepsView, _canvas.Content.transform);
+                var step = _pool.Spawn();
+                step.transform.SetSiblingIndex(0);
+                _steps.Add(step);
+
+                _currentStep = step;
             }
 
             _currentStep.SetTextByColor(stepSignal.Color, stepSignal.Type.FigureMarkFormat() + stepSignal.Step.CordinateFormat());
@@ -46,9 +52,14 @@ namespace Assets.Scripts.Game.Managers
             }
         }
 
-        //private void OnReset(ResetSignal resetSignal)
-        //{
-        //    _canvas.Content.Reset();
-        //}
+        private void OnReset(ResetSignal resetSignal)
+        {
+            foreach(var step in _steps)
+            {
+                _pool.Despawn(step);
+            }
+            _steps.Clear();
+            _currentStep = null;
+        }
     }
 }

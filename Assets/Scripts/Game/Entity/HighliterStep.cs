@@ -34,11 +34,6 @@ namespace Assets.Scripts.Game.Entity
                 step.ChangePosition(initialPosition);
                 step.SetupSize(cellSize);
             }
-
-            protected override void OnSpawned(HighliterStep step)
-            {
-                base.OnSpawned(step);
-            }
         }
     }
 }

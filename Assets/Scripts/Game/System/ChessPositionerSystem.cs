@@ -27,7 +27,6 @@ namespace Assets.Scripts.Game.System
         public void InitiChessPosition(Figure figure, Vector2Int vector)
         {
             _figureArray[vector.x, vector.y] = figure;
-            _figureToPositionDictionary.Add(figure, vector);
             _initionalFigureToPositionDictionary.Add(figure, vector);
         }
 
@@ -54,13 +53,20 @@ namespace Assets.Scripts.Game.System
             {
                 var figure = figureAndPos.Key;
                 var initCoordinate = figureAndPos.Value;
-                var lastCordinate = _figureToPositionDictionary[figure];
-
-                _figureToPositionDictionary[figure] = initCoordinate;
-                if (lastCordinate != initCoordinate)
+                
+                if(!_figureToPositionDictionary.TryGetValue(figure, out var lastCordinate))
                 {
-                    _figureArray[lastCordinate.x, lastCordinate.y] = null;
+                    _figureToPositionDictionary.Add(figure, initCoordinate);
                     _figureArray[initCoordinate.x, initCoordinate.y] = figure;
+                }
+                else
+                {
+                    _figureToPositionDictionary[figure] = initCoordinate;
+                    if (lastCordinate != initCoordinate)
+                    {
+                        _figureArray[lastCordinate.x, lastCordinate.y] = null;
+                        _figureArray[initCoordinate.x, initCoordinate.y] = figure;
+                    }
                 }
 
                 ForceChangeChessPosition.Invoke(figure, initCoordinate);

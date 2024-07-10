@@ -71,6 +71,7 @@ namespace Assets.Scripts.StateMachines.Core
             if (_enemy != null)
             {
                 await _enemy.FallAnimation();
+                _enemy.SetActive(false);
             }
             await base.Exit(token);
         }

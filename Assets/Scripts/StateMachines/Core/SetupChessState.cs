@@ -32,6 +32,7 @@ namespace Assets.Scripts.StateMachines.Core
         public async override UniTask Run(CancellationToken token)
         {
             var board = MonoBehaviour.Instantiate<Board>(_chessConfigurationFacade.BoardConfiguration.Board);
+            _boardManager.SetupBoard(board);
             CreateChessSet(board.transform);
 
             await GoTo(_chooseChessState.Value, token);

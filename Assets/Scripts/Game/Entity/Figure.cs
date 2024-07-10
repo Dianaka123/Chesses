@@ -71,6 +71,11 @@ namespace Assets.Scripts.Game.Entity
             await _renderer.DissolveAsync(1f);
         }
 
+        public void SetActive(bool active)
+        {
+            gameObject.SetActive(active);
+        }
+
         public void ResetFigure(Vector3 resetPosition)
         {
             _renderer.ResetShaderToStandart();

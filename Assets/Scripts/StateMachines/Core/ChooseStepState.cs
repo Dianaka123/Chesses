@@ -3,7 +3,6 @@ using Assets.Scripts.Game.Managers;
 using Assets.Scripts.Game.System.Interfaces;
 using Assets.Scripts.StateMachines.Base;
 using Cysharp.Threading.Tasks;
-using DG.Tweening.Core.Easing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
