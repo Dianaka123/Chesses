@@ -61,9 +61,11 @@ namespace Assets.Scripts.StateMachines.Core
                 _highlightFigure = null;
             }
 
-            if (Input.GetMouseButtonDown(0))
+            var collider = raycastHit.collider;
+
+            if (Input.GetMouseButtonDown(0) && collider != null)
             {
-                var figure = raycastHit.collider.gameObject?.GetComponent<Figure>();
+                var figure = collider.gameObject?.GetComponent<Figure>();
                 if (figure != null && figure.Color == _playerStep)
                 {
                     _gameManager.SelectedFigure = figure;

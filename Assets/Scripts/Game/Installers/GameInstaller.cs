@@ -5,6 +5,7 @@ using Assets.Scripts.Game.System;
 using Assets.Scripts.StateMachines.Base;
 using Assets.Scripts.StateMachines.Core;
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
 
 namespace Assets.Scripts.Game.Installers
@@ -18,7 +19,7 @@ namespace Assets.Scripts.Game.Installers
         private StepUIView _stepViewUi;
 
         [SerializeField]
-        private Transform _stepUIContainer;
+        private ScrollRect _stepUIContainer;
         
         public override void InstallBindings()
         {
@@ -58,7 +59,9 @@ namespace Assets.Scripts.Game.Installers
             Container.BindMemoryPool<StepUIView, StepUIView.Pool>()
                 .WithInitialSize(2)
                 .FromComponentInNewPrefab(_stepViewUi)
-                .UnderTransform(_stepUIContainer);
+                .UnderTransform(_stepUIContainer.content);
+
+            Container.Bind<ScrollRect>().WithId("CoreUIScrollRect").FromInstance(_stepUIContainer).AsSingle();
         }
 
         void InstallStates()
